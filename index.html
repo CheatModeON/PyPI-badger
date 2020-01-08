@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+        
+        <link href="https://fonts.googleapis.com/css?family=Orbitron|PT+Mono&display=swap" rel="stylesheet">
+        
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    
+    </head>
+    
+    <style>
+        html, body {
+            height: 100%;
+        }
+        
+        html {
+            display: table;
+            margin: auto;
+        }
+        
+        body {
+            display: table-cell;
+            vertical-align: middle;
+        }
+        
+        a.button {
+        -webkit-appearance: button;
+        -moz-appearance: button;
+        appearance: button;
+        
+        text-decoration: none;
+        color: initial;
+        
+        background-color: #4CAF50; 
+          border: none;
+          color: white;
+          padding: 5px 32px;
+          text-align: center;
+          text-decoration: none;
+          display: inline-block;
+          font-size: 16px;
+        }
+        
+        
+        .search-container input{
+          /*float: left;*/
+          width: 400px;
+        }
+        .search-container button {
+          /*float: right;*/
+          padding: 2px 6px;
+          margin-top: 8px;
+          margin-right: 16px;
+          background: #ddd;
+          font-size: 14px;
+          border: none;
+          cursor: pointer;
+        }
+        
+        .search-container button:hover {
+            font-size:14px;
+          background: #ccc;
+        }
+        h {
+            letter-spacing: 5px;
+            font-size: 55px;
+            font-family: 'Orbitron', sans-serif;
+        }
+        h1 {
+            letter-spacing: 2px;
+            font-size: 28px;
+            font-family: 'Orbitron', sans-serif;
+        }
+        h3 {
+            letter-spacing: 1px;
+            font-size: 10px;
+            font-family: 'PT Mono', monospace;
+        }
+        p {
+            /*text-indent: 50px;
+            text-align: justify;*/
+            letter-spacing: 3px;
+        }
+        .footer {
+            font-family: 'PT Mono', monospace;
+
+            font-size: 12px;
+           position: fixed;
+           left: 0;
+           bottom: 0;
+           width: 100%;
+           background-color: #006EAB;
+           color: white;
+           text-align: center;
+        }
+    </style>
+<body>
+    
+
+<!--img id="pypi" src="pypi_logo.png" width="100" height="100" /-->
+
+<h>PyPI<a href="disclaimer.html" style="font-size: 20px;">*</a> Badger</h>
+
+<h1>Example:</h1>
+<img src="pypi_badge.png" />
+
+<h1>Search your pkg:</h1>
+
+<div class="search-container">
+    <input type="text" id="src" placeholder="Search.." name="search">
+    <button type="submit" id="btn" onclick="search_lib()"><i class="fa fa-search"></i></button>
+</div>
+
+<script>
+    var input = document.getElementById("src");
+    input.addEventListener("keyup", function(event) {
+        if (event.keyCode === 13) {
+            event.preventDefault();
+            document.getElementById("btn").click();
+        }
+    });
+</script>
+
+<br>
+<div class="search-container">
+<p>Embeded with:</p>
+<input id="embeded" type="text" value="" readonly>
+<button onclick="copy('e')"><i class="fa fa-copy"></i></button>
+<br>
+
+<p>Or in Markdown: </p>
+<input id="markdown" type="text" value="" readonly>
+<button onclick="copy('m')"><i class="fa fa-copy"></i></button>
+</div>
+<br>
+
+<script>
+  function copy(sel) {
+  if(sel=='e'){
+      copyText = document.getElementById("embeded")
+  } else {
+      copyText = document.getElementById("markdown")
+  }
+  /* Select the text field */
+  copyText.select(); 
+  copyText.setSelectionRange(0, 99999); /*For mobile devices*/
+
+  /* Copy the text inside the text field */
+  document.execCommand("copy");
+  }
+</script>
+
+<div>
+    <canvas id="myCanvas" width="440" height="90" style="border:1px solid #d3d3d3; visibility: hidden;">
+    Your browser does not support the HTML5 canvas tag.</canvas>
+</div>
+<!--div class="mypanel"></div-->
+<div>
+<a id="download" download="pypi_badge.png" href="" class="button" onclick="download_img(this);" style="visibility: hidden;">Download</a>
+</div>
+
+<script>
+
+function search_lib(){
+
+    var project = document.getElementById("src").value;
+    var success = false;
+    
+    $.getJSON('https://pypi.org/pypi/'+project+'/json', function(data) {
+        success = true;
+        
+        var name;
+        var author;
+        var ver;
+        
+        //data is the JSON string
+        name = data.info.name;
+        author = data.info.author;
+        ver = data.info.version;
+        
+    	/*var text = `name: ${data.info.name}<br>
+                    author: ${data.info.author}<br>
+                    version: ${data.info.version}`
+                        */
+    
+    	var c = document.getElementById("myCanvas");
+    	var ctx = c.getContext("2d");
+    	
+        ctx.fillStyle = "#0202";
+    	ctx.fillRect(0, 0, c.width, c.height);
+        
+        //grd
+        var grd = ctx.createLinearGradient(300, 0, c.width-20, 200);
+        grd.addColorStop(0, "#006EAB");
+        grd.addColorStop(1, "white");
+        ctx.fillStyle = grd;
+        ctx.fillRect(2, 2, c.width-4, c.height-4);
+    
+        //ctx.fillStyle = "#006EAB";
+    	//ctx.fillRect(2, 2, c.width-4, c.height-4);
+        
+        ctx.fillStyle = "#fff";
+    	ctx.font = "bold 16px Arial";
+    
+    	ctx.fillText("pip install "+name,110,30);
+    	ctx.font = "12px Arial";
+    	ctx.fillText("by "+author,110,50);
+    	ctx.fillText("version "+ver,110,70);
+    
+        var img = new Image;
+    	img.onload = function(){
+      		ctx.drawImage(img,0,0,img.width,img.height,10,5,80,80);
+    	};
+    	img.src = "/pypico/pypi_logo.png";
+        
+        //$(".mypanel").html(text);
+    });
+    
+    var canvas = document.getElementById("myCanvas");
+    var d=document.getElementById('download');
+
+    setTimeout(function() {
+        if (!success)
+        {
+            canvas.style.visibility='hidden';
+            d.style.visibility='hidden';
+            alert("Project "+project + " is not found!"); // string was "Houston, we have a problem."
+        }
+        else
+        {
+            download_img = function(el) {
+              var image = canvas.toDataURL("image/png");
+              el.href = image;
+            };
+            
+            var dataURL = canvas.toDataURL("image/png");
+            $.ajax({
+              type: "POST",
+              url: "photo_upload.php",
+              data: { 
+                 name: project,
+                 img: dataURL
+              }
+            }).done(function(o) {
+              //alert('saved'); 
+              document.getElementById('embeded').value = '<a href="https://pypi.org/project/'+project+'/"><img src="http://83.212.112.51/pypico/images/'+ project +'.png"></a>';
+              document.getElementById('markdown').value = '[![PyPi](http://83.212.112.51/pypico/images/'+ project+'.png)](https://pypi.org/project/'+project+'/)';
+              
+              // If you want the file to be visible in the browser 
+              // - please modify the callback in javascript. All you
+              // need is to return the url to the file, you just saved 
+              // and than put the image in your browser.
+            });
+            
+            canvas.style.visibility='visible';
+            d.style.visibility='visible';
+        }
+    
+    }, 2000);
+    
+}
+
+</script>
+
+<div class="footer">
+  <p>All rights reserved 2019 Achilleas Papakonstantinou, GitHub: <a href = "http://github.com/cheatmodeon">@CheatModeON</a></p>
+    <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+    <p>Support the project: 
+    <input type="hidden" name="cmd" value="_s-xclick" />
+    <input type="hidden" name="hosted_button_id" value="VKQ3QN5YNEQCS" />
+    <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif" border="0" name="submit" title="PayPal - The safer, easier way to pay online!" alt="Donate with PayPal button" />
+    <img alt="" border="0" src="https://www.paypal.com/en_GR/i/scr/pixel.gif" width="1" height="1" />
+    </p>
+    </form>
+</div>
+
+</body>
+</html>
+
